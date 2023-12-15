@@ -26,4 +26,4 @@ jobs:
       - name: Check Linting 
         run: |
           pip install -r dev-requirements.txt
-          black . --check
+          ./check-lint.sh

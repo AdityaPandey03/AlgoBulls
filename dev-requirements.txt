@@ -1,2 +1,3 @@
 black
 Flake8
+coverage
