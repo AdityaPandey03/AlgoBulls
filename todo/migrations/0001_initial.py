@@ -5,46 +5,97 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Task',
+            name="Task",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('title', models.CharField(max_length=100)),
-                ('description', models.CharField(max_length=1000)),
-                ('due_date', models.DateField(blank=True, null=True)),
-                ('status', models.CharField(choices=[('OPEN', 'Open'), ('WORKING', 'Working'), ('DONE', 'Done'), ('OVERDUE', 'Overdue')], default='Open', max_length=7)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("timestamp", models.DateTimeField(auto_now_add=True)),
+                ("title", models.CharField(max_length=100)),
+                ("description", models.CharField(max_length=1000)),
+                ("due_date", models.DateField(blank=True, null=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("OPEN", "Open"),
+                            ("WORKING", "Working"),
+                            ("DONE", "Done"),
+                            ("OVERDUE", "Overdue"),
+                        ],
+                        default="Open",
+                        max_length=7,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='User',
+            name="User",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('username', models.CharField(max_length=200, unique=True)),
-                ('password', models.CharField(max_length=30)),
-                ('last_login_time', models.DateTimeField(null=True)),
-                ('login_token', models.CharField(max_length=100, null=True, unique=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("username", models.CharField(max_length=200, unique=True)),
+                ("password", models.CharField(max_length=30)),
+                ("last_login_time", models.DateTimeField(null=True)),
+                (
+                    "login_token",
+                    models.CharField(max_length=100, null=True, unique=True),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='TaskTag',
+            name="TaskTag",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('tag', models.CharField(blank=True, max_length=50, null=True)),
-                ('task', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='task_tags', to='todo.Task')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='todo.User')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("tag", models.CharField(blank=True, max_length=50, null=True)),
+                (
+                    "task",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="task_tags",
+                        to="todo.Task",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="todo.User"
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='task',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='todo.User'),
+            model_name="task",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="todo.User"
+            ),
         ),
     ]
