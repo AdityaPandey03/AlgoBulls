@@ -1,12 +1,8 @@
 import uuid
-from django.shortcuts import render
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
-from todo.models import *
-from rest_framework.status import HTTP_401_UNAUTHORIZED
+from todo.models import User, Task, TaskTag
 from todo.helper import CustomAuthentication
-from rest_framework import exceptions
-from django.core.exceptions import ObjectDoesNotExist
 
 
 class UserViewSet(ViewSet):

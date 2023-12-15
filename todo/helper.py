@@ -1,8 +1,6 @@
 from todo.models import User
 from rest_framework import exceptions
 from rest_framework import authentication
-from rest_framework.status import HTTP_401_UNAUTHORIZED
-from rest_framework.response import Response
 
 
 def get_user_from_login_token(input_login_token):
