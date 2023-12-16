@@ -11,7 +11,6 @@ from todo.serializers import (
     UserSignupSerializer,
     UserLoginSerializer,
     TaskSerializer,
-    TaskTagSerializer,
     TaskRetrievalSerializer,
     AllTasksRetrievalSerializer,
 )
