@@ -1,13 +1,20 @@
+# **AlgoBulls Assignment**
 
 
 
+Root Folder -> AlgoBulls
 
-password validation, make_password, check_password(authentication header = Basic username=password)
+Go to terminal, and enter these commands
 
-serializers
+pip install -r requirements.txt
 
-due_date -> DateField
+pip install -r dev-requirements.txt
 
-task, tag pairs to be unique_together constraint
+then hit **python manage.py runserver**
 
-unit test to be made
+****Authentication** -> Token based(make_password, check_password)
+**
+
+**For Linting Tools** -> ./check-lint.sh, ./lint-sh
+
+**For Generating Coverage** -> ./generate-coverage-report.sh![1702762444573](image/README/1702762444573.png)![1702762426889](image/README/1702762426889.png)
