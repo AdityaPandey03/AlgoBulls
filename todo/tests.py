@@ -1,244 +1,229 @@
-# from django.test import TestCase
-# from todo.models import Task, TaskTag, User
-# from rest_framework.test import APITestCase, APIClient
+from todo.models import User, Task, TaskTag
+from rest_framework.test import APITestCase, APIClient
 
 
-# class UserAPITestCase(TestCase):
-#     def test_user_signup_success(self):
-#         response = self.client.post(
-#             "/api/signup/", {"username": "testuser", "password": "testpass"}
-#         )
-#         self.assertEqual(response.status_code, 200)
-#         self.assertIn("login_token", response.data)
+class CustomAuthenticationTestCase(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create(username="testuser", password="testpassword")
 
-#     def test_user_signup_failure_user_exists(self):
-#         response = self.client.post(
-#             "/api/signup/", {"username": "testuser", "password": "testpass"}
-#         )
-#         self.assertEqual(response.status_code, 403)
-#         self.assertEqual(response.data["message"], "User already exists")
-
-
-#     def test_user_login_success(self):
-#         response = self.client.post("/api/login/", {"username": "testuser", "password": "testpass"})
-#         self.assertEqual(response.status_code, 200)
-#         self.assertIn("message", response.data)
-
-#     def test_user_login_failure_incorrect_username(self):
-#         response = self.client.post("/api/login/", {"username": "wronguser", "password": "testpass"})
-#         self.assertEqual(response.status_code, 404)
-#         self.assertEqual(response.data["message"], "Please check the username")
-
-#     def test_user_login_failure_incorrect_password(self):
-#         response = self.client.post("/api/login/", {"username": "testuser", "password": "wrongpass"})
-#         self.assertEqual(response.status_code, 401)
-#         # import pdb
-#         # pdb.set_trace()
-#         self.assertEqual(response.data["message"], "Incorrect Password")
-
-#     # def test_signup_and_login_api(self):
-#     #     response = self.client.post(
-#     #         "/api/signup/", {"username": "adi", "password": "dummy"}
-#     #     )
-
-#     #     self.assertEqual(response.status_code, 200)
-#     #     self.assertIn(
-#     #         "login_token", response.json()
-#     #     )  # checking if login_Token key is present in response
-
-#     #     response = self.client.post(
-#     #         "/api/signup/", {"username": "adi", "password": "dummy"}
-#     #     )
-
-#     #     self.assertEqual(response.status_code, 403)
-#     #     self.assertEqual(response.json()["message"], "User already exists")
-
-#     #     response = self.client.post(
-#     #         "/api/login/", {"username": "adi", "password": "dummy"}
-#     #     )
-
-#     #     self.assertEqual(response.status_code, 200)
-#     #     # self.assertIn('login_token', response.json())
-
-#     #     response = self.client.post(
-#     #         "/api/login/", {"username": "ad", "password": "dummy"}
-#         # )
-
-#         # self.assertEqual(response.status_code, 404)
-#         # self.assertEqual(response.json()["message"], "Please check the username")
-
-#         # response = self.client.post(
-#         #     "/api/login/", {"username": "adi", "password": "dumm"}
-#         # )
-
-#         # self.assertEqual(response.status_code, 401)
-#         # self.assertEqual(response.json()["message"], "Incorrect Password")
+    def test_authentication_failure_invalid_token(self):
+        self.client.credentials(HTTP_AUTHORIZATION="InvalidToken")
+        response = self.client.get(
+            "/api/all-tasks/"
+        )  # Replace with an actual protected endpoint
+        self.assertEqual(response.status_code, 403)
+        self.assertIn("detail", response.data)
+        self.assertEqual(response.data["detail"], "No such user")
 
 
-# class TaskAPITestCase(TestCase):
+class UserAPITestCase(APITestCase):
+    def test_user_signup_success(self):
+        response = self.client.post(
+            "/api/signup/", {"username": "newuser", "password": "dummy"}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("login_token", response.data)
 
-#     def setUp(self):
-#         self.client = APIClient()
-#         self.user = User.objects.create(username='testuser', password='testpassword')
-#         self.client.force_authenticate(user=self.user)
-#         # self.user = User.objects.create(username='testuser', password='testpassword')
-#         # self.client.force_authenticate(user=self.user) # to ensure user is authenticated
+    def test_user_signup_failure_user_exists(self):
+        User.objects.create(username="existinguser", password="password")
+        response = self.client.post(
+            "/api/signup/", {"username": "existinguser", "password": "dummy"}
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.data["message"], "User already exists")
 
-#     def test_create_task_with_valid_data(self):
+    def test_user_login_success(self):
+        self.client.post(
+            "/api/signup/", {"username": "testuser", "password": "testpassword"}
+        )
+        response = self.client.post(
+            "/api/login/", {"username": "testuser", "password": "testpassword"}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("message", response.data)
 
-#         response = self.client.post(
-#             "/api/create-task/",
-#             {
-#                 "title": "first post",
-#                 "description": "hey",
-#                 "due_date": "20 December 2023",
-#                 "status": "OPEN",
-#                 "task_tags": [{"tag": "post"}, {"tag": "blog"}],
-#             },
-#         )
-#         task_id = response.json().get("task_id")
-#         self.assertEqual(response.status_code, 201)
-#         self.assertTrue(Task.objects.filter(id=task_id).exists())
-#         self.assertEqual(TaskTag.objects.filter(task_id=task_id).count(), 2)
+    def test_user_login_failure_incorrect_username(self):
+        response = self.client.post(
+            "/api/login/", {"username": "wronguser", "password": "testpass"}
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.data["message"], "Please check the username")
 
-#     def test_create_task_with_invalid_status(self):
-#         response = self.client.post(
-#             "/api/create-task/",
-#             {
-#                 "title": "second post",
-#                 "description": "hello",
-#                 "due_date": "25 December 2023",
-#                 "status": "NOT_OPEN",  # Invalid status
-#                 "task_tags": [{"tag": "holiday"}],
-#             },
-#         )
-#         self.assertEqual(response.status_code, 400)
-#         self.assertIn("status", response.json())
+    def test_user_login_failure_incorrect_password(self):
+        User.objects.create(username="testuser", password="testpassword")
+        response = self.client.post(
+            "/api/login/", {"username": "testuser", "password": "wrongpass"}
+        )
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.data["message"], "Incorrect Password")
 
-#     def test_create_task_unauthenticated_user(self):
-#         # remove authentication
-#         self.client.force_authenticate(user=None)
+    def test_custom_authentication_success(self):
+        signup_response = self.client.post(
+            "/api/signup/", {"username": "adi", "password": "dummy"}
+        )
+        self.assertEqual(signup_response.status_code, 200)
+        token = signup_response.json().get("login_token")
 
-#         response = self.client.post(
-#             "/api/create-task/",
-#             {
-#                 "title": "Unauthenticated post",
-#                 "description": "Unauthenticated access",
-#                 "due_date": "30 December 2023",
-#                 "status": "OPEN",
-#                 "task_tags": [{"tag": "unAuthenticated"}],
-#             },
-#         )
-#         import pdb
-#         pdb.set_trace()
-#         self.assertNotEqual(response.status_code, 201)
-#         self.assertIn("detail", response.json())
+        self.client.credentials(HTTP_AUTHORIZATION=token)
 
-# def test_todo_tasks(self):
-#     response = self.client.post(
-#         "/api/signup/", {"username": "adi", "password": "dummy"}
-#     )
+        user = User.objects.get(username="adi")
+        Task.objects.create(
+            user=user,
+            title="Sample Task",
+            description="Description",
+            due_date="2023-12-25",
+            status="OPEN",
+        )
 
-#     token = response.json().get("login_token")
+        response = self.client.get("/api/all-tasks/")
 
-#     response = self.client.post(
-#         "/api/create-task/",
-#         {
-#             "title": "first post",
-#             "description": "hey",
-#             "due_date": "20december",
-#             "status": "OPEN",
-#             "tags": ["post", "blog"],
-#         },
-#         HTTP_AUTHORIZATION=token,
-#     )
+        self.assertEqual(response.status_code, 200)
 
-#     task_id = response.json()["task_id"]
 
-#     self.assertEqual(response.status_code, 200)
-#     self.assertTrue(Task.objects.filter(id=task_id).exists())
+class TaskAPITestCase(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create(username="testuser", password="testpassword")
+        self.client.force_authenticate(user=self.user)
+        self.user_without_tasks = User.objects.create(
+            username="user_without_tasks", password="password"
+        )
+        self.task = Task.objects.create(
+            user=self.user,
+            title="Sample Task",
+            description="Description",
+            status="OPEN",
+        )
+        TaskTag.objects.create(task=self.task, user=self.user, tag="tag1")
 
-#     response = self.client.post(
-#         "/api/create-task/",
-#         {
-#             "title": "first post",
-#             "description": "hey",
-#             "due_date": "20december",
-#             "status": "NOT_OPEN",
-#             "tags": ["post", "blog"],
-#         },
-#         HTTP_AUTHORIZATION=token,
-#     )
+    def test_create_task_success(self):
+        response = self.client.post(
+            "/api/create-task/",
+            {
+                "title": "first post",
+                "description": "hey",
+                "due_date": "2023-12-25",
+                "status": "OPEN",
+                "tags": ["post", "blog"],
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        task_id = response.json().get("task_id")
+        self.assertTrue(Task.objects.filter(id=task_id).exists())
 
-#     self.assertEqual(response.status_code, 400)
-#     self.assertEqual(response.json()["message"], "Invalid status")
+    def test_create_task_invalid_status(self):
+        response = self.client.post(
+            "/api/create-task/",
+            {
+                "title": "second post",
+                "description": "hey again",
+                "due_date": "2023-12-30",
+                "status": "NOT_OPEN",  # Invalid status
+                "tags": ["work", "update"],
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["message"], "Invalid status")
 
-#     response = self.client.get(
-#         "/api/task/?id=" + str(task_id), HTTP_AUTHORIZATION=token
-#     )
+    def test_get_task_success(self):
+        task_id = self.task.id
+        response = self.client.get(f"/api/task/{task_id}/")
+        self.assertEqual(response.status_code, 200)
 
-#     self.assertEqual(response.status_code, 200)
+    def test_create_task_with_default_status(self):
+        response = self.client.post(
+            "/api/create-task/",
+            {
+                "title": "Test Task",
+                "description": "Test Description",
+                "tags": ["tag1", "tag2"],
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        task_id = response_data.get("task_id")
+        created_task = Task.objects.get(id=task_id)
+        self.assertEqual(created_task.status, "OPEN")
 
-#     response = self.client.get("/api/task/?id=" + str(2), HTTP_AUTHORIZATION=token)
+    def test_get_task_not_found(self):
+        non_existent_task_id = 99999  # An ID that does not exist
+        response = self.client.get(f"/api/task/{non_existent_task_id}/")
+        self.assertEqual(response.status_code, 404)
 
-#     self.assertEqual(response.status_code, 404)
-#     self.assertEqual(response.json()["message"], "No such task")
+    def test_get_task_invalid_id_format(self):
+        response = self.client.get("/api/task/?id=invalid")
+        self.assertEqual(response.status_code, 404)
 
-#     response = self.client.get("/api/all-tasks/", HTTP_AUTHORIZATION=token)
+    def test_get_task_unauthorized_user(self):
+        another_user = User.objects.create(username="otheruser", password="password")
+        self.client.force_authenticate(user=another_user)
+        response = self.client.get(f"/api/task/?id={self.task.id}")
+        self.assertEqual(response.status_code, 404)
 
-#     self.assertEqual(response.status_code, 200)
+    def test_get_all_tasks_success(self):
+        response = self.client.get("/api/all-tasks/")
+        self.assertEqual(response.status_code, 200)
+        tasks_data = response.json()["message"]
+        self.assertTrue(any(task["id"] == self.task.id for task in tasks_data))
 
-#     response = self.client.post(
-#         "/api/update-task/?id=" + str(task_id),
-#         {
-#             "title": "first updated post",
-#             "due_date": "21december",
-#             "status": "OPEN",
-#             "tags": ["post", "blog", "MORE", "fun"],
-#         },
-#         HTTP_AUTHORIZATION=token,
-#     )
+    def test_get_all_tasks_no_tasks_user(self):
+        self.client.force_authenticate(user=self.user_without_tasks)
+        response = self.client.get("/api/all-tasks/")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.data["message"], "No such user")
 
-#     self.assertEqual(response.status_code, 200)
+    def test_update_task_success(self):
+        response = self.client.post(
+            f"/api/update-task/?id={self.task.id}",
+            {
+                "title": "Updated Title",
+                "description": "Updated Description",
+                "due_date": "2023-12-25",
+                "status": "OPEN",
+                "tags": ["Updated", "Tags"],
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        updated_task = Task.objects.get(id=self.task.id)
+        self.assertEqual(updated_task.title, "Updated Title")
 
-#     response = self.client.post(
-#         "/api/update-task/?id=" + str(12),
-#         {
-#             "title": "first updated post",
-#             "due_date": "21december",
-#             "status": "OPEN",
-#             "tags": ["post", "blog", "MORE", "fun"],
-#         },
-#         HTTP_AUTHORIZATION=token,
-#     )
+    def test_update_nonexistent_task(self):
+        nonexistent_task_id = self.task.id + 1
+        response = self.client.post(
+            f"/api/update-task/?id={nonexistent_task_id}",
+            {"title": "New Title", "status": "OPEN"},
+        )
+        self.assertEqual(response.status_code, 404)
 
-#     self.assertEqual(response.status_code, 404)
-#     self.assertEqual(response.json()["message"], "No such task")
+    def test_update_task_invalid_status(self):
+        response = self.client.post(
+            f"/api/update-task/?id={self.task.id}",
+            {"title": "New Title", "status": "INVALID_STATUS"},
+        )
+        self.assertEqual(response.status_code, 400)
 
-#     response = self.client.post(
-#         "/api/update-task/?id=" + str(task_id),
-#         {
-#             "title": "first updated post",
-#             "due_date": "21december",
-#             "status": "OPEN_IN",
-#             "tags": ["post", "blog", "MORE", "fun"],
-#         },
-#         HTTP_AUTHORIZATION=token,
-#     )
+    def test_update_task_unauthorized_user(self):
+        new_user = User.objects.create(username="otheruser", password="password")
+        self.client.force_authenticate(user=new_user)
+        response = self.client.post(
+            f"/api/update-task/?id={self.task.id}",
+            {"title": "New Title", "status": "OPEN"},
+        )
+        self.assertEqual(response.status_code, 401)
 
-#     self.assertEqual(response.status_code, 400)
-#     self.assertEqual(response.json()["message"], "Invalid status")
+    def test_delete_task_success(self):
+        response = self.client.post(f"/api/delete-task/?id={self.task.id}")
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(Task.objects.filter(id=self.task.id).exists())
 
-#     response = self.client.post(
-#         "/api/delete-task/?id=" + str(2), HTTP_AUTHORIZATION=token
-#     )
+    def test_delete_nonexistent_task(self):
+        nonexistent_task_id = self.task.id + 1
+        response = self.client.post(f"/api/delete-task/?id={nonexistent_task_id}")
+        self.assertEqual(response.status_code, 404)
 
-#     self.assertEqual(response.status_code, 404)
-#     self.assertEqual(response.json()["message"], "No such task")
-
-#     response = self.client.post(
-#         "/api/delete-task/?id=" + str(task_id), HTTP_AUTHORIZATION=token
-#     )
-
-#     self.assertEqual(response.status_code, 204)
-#     self.assertFalse(Task.objects.filter(id=task_id).exists())
+    def test_delete_task_unauthorized_user(self):
+        another_user = User.objects.create(username="otheruser", password="password")
+        self.client.force_authenticate(user=another_user)
+        response = self.client.post(f"/api/delete-task/?id={self.task.id}")
+        self.assertEqual(response.status_code, 401)

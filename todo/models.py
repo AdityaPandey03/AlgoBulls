@@ -21,11 +21,11 @@ class Task(models.Model):
         (
             "OPEN",
             "Open",
-        ),  # here, first element is the value that will be stored in the DataBase
+        ),
         (
             "WORKING",
             "Working",
-        ),  # second element is the value that is for frontEnd(human readable)
+        ),
         ("DONE", "Done"),
         ("OVERDUE", "Overdue"),
     ]

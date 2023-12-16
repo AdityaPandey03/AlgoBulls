@@ -15,7 +15,7 @@ class CustomAuthentication(authentication.BaseAuthentication):
         input_login_token = request.META.get("HTTP_AUTHORIZATION")
         user = get_user_from_login_token(input_login_token)
 
-        if User is None:
+        if user is None:
             raise exceptions.AuthenticationFailed("No such user")
         return (user, None)
 
