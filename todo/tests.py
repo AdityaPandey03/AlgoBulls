@@ -9,9 +9,7 @@ class CustomAuthenticationTestCase(APITestCase):
 
     def test_authentication_failure_invalid_token(self):
         self.client.credentials(HTTP_AUTHORIZATION="InvalidToken")
-        response = self.client.get(
-            "/api/all-tasks/"
-        )  # Replace with an actual protected endpoint
+        response = self.client.get("/api/all-tasks/")
         self.assertEqual(response.status_code, 403)
         self.assertIn("detail", response.data)
         self.assertEqual(response.data["detail"], "No such user")
@@ -32,6 +30,11 @@ class UserAPITestCase(APITestCase):
         )
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.data["message"], "User already exists")
+
+    def test_signup_without_password(self):
+        response = self.client.post("/api/signup/", {"username": "newuser"})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data["message"], "Password is required")
 
     def test_user_login_success(self):
         self.client.post(
@@ -119,7 +122,7 @@ class TaskAPITestCase(APITestCase):
                 "title": "second post",
                 "description": "hey again",
                 "due_date": "2023-12-30",
-                "status": "NOT_OPEN",  # Invalid status
+                "status": "NOT_OPEN",
                 "tags": ["work", "update"],
             },
         )
@@ -130,6 +133,30 @@ class TaskAPITestCase(APITestCase):
         task_id = self.task.id
         response = self.client.get(f"/api/task/{task_id}/")
         self.assertEqual(response.status_code, 200)
+
+    def test_create_task_without_title(self):
+        task_data = {
+            "description": "A test task description",
+            "due_date": "2023-12-30",
+            "status": "NOT_OPEN",
+            "tags": ["work", "update"],
+        }
+
+        response = self.client.post("/api/create-task/", task_data)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data["message"], "Title is required")
+
+    def test_create_task_without_description(self):
+        task_data = {
+            "title": "second post",
+            "due_date": "2023-12-30",
+            "status": "NOT_OPEN",
+            "tags": ["work", "update"],
+        }
+
+        response = self.client.post("/api/create-task/", task_data)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data["message"], "Description is required")
 
     def test_create_task_with_default_status(self):
         response = self.client.post(
@@ -147,7 +174,7 @@ class TaskAPITestCase(APITestCase):
         self.assertEqual(created_task.status, "OPEN")
 
     def test_get_task_not_found(self):
-        non_existent_task_id = 99999  # An ID that does not exist
+        non_existent_task_id = 99999
         response = self.client.get(f"/api/task/{non_existent_task_id}/")
         self.assertEqual(response.status_code, 404)
 

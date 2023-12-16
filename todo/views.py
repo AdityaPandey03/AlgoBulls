@@ -14,6 +14,9 @@ class UserViewSet(ViewSet):
         if User.objects.filter(username=input_username).exists():
             return Response(data={"message": "User already exists"}, status=403)
 
+        if input_password is None:
+            return Response(data={"message": "Password is required"}, status=400)
+
         hashed_password = make_password(input_password)
 
         user = User.objects.create(
@@ -65,6 +68,12 @@ class TaskViewSet(ViewSet):
 
         if input_status is None:
             input_status = "OPEN"
+
+        if input_title is None:
+            return Response(data={"message": "Title is required"}, status=400)
+
+        if input_description is None:
+            return Response(data={"message": "Description is required"}, status=400)
 
         if input_status not in valid_status:
             return Response(data={"message": "Invalid status"}, status=400)
