@@ -4,6 +4,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import make_password, check_password
 import uuid
 
+
 class UserSignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -11,7 +12,7 @@ class UserSignupSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         username = data.get("username")
-        if User.objects.filter(username = username).exists():
+        if User.objects.filter(username=username).exists():
             raise serializers.ValidationError("User already exists")
         return data
 
@@ -34,9 +35,10 @@ class UserLoginSerializer(serializers.Serializer):
             raise serializers.ValidationError({"username": "User does not exist"})
         if not check_password(password, user.password):
             raise serializers.ValidationError({"password": "Incorrect Password"})
-        
+
         return data
-    
+
+
 # class UserLoginSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = User
@@ -45,22 +47,23 @@ class UserLoginSerializer(serializers.Serializer):
 #     def validate(self, data):
 #         username = data.get("username")
 #         password = data.get("password")
-        
+
 #         user = User.objects.filter(username = username).first()
 #         if not user:
 #             raise serializers.ValidationError("User does not exist")
 #         if not check_password(password, user.password):
 #             raise serializers.ValidationError("Incorrect Password")
 #         return data
-    
+
+
 class TaskTagSerializer(serializers.ModelSerializer):
     class Meta:
         model = TaskTag
-        fields = ['tag']
+        fields = ["tag"]
 
     def create(self, validated_data):
-        task = self.context.get('task')
-        user = self.context.get('user')
+        task = self.context.get("task")
+        user = self.context.get("user")
         return TaskTag.objects.create(task=task, user=user, **validated_data)
 
 
@@ -69,11 +72,19 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ['id', 'title', 'description', 'due_date', 'status', 'task_tags', 'user']
-        extra_kwargs = {'user': {'write_only': True}}
+        fields = [
+            "id",
+            "title",
+            "description",
+            "due_date",
+            "status",
+            "task_tags",
+            "user",
+        ]
+        extra_kwargs = {"user": {"write_only": True}}
 
     def create(self, validated_data):
-        tags_data = validated_data.pop('task_tags', [])
+        tags_data = validated_data.pop("task_tags", [])
         task = Task.objects.create(**validated_data)
 
         for tag_data in tags_data:
@@ -81,8 +92,6 @@ class TaskSerializer(serializers.ModelSerializer):
 
         return task
 
-
-    
     # def get_task_tags(self, obj):
     #     tags = TaskTag.objects.filter(task=obj)
     #     return [tag.tag for tag in tags]
@@ -96,10 +105,10 @@ class TaskRetrievalSerializer(serializers.Serializer):
             raise serializers.ValidationError("No such task")
         return value
 
+
 class AllTasksRetrievalSerializer(serializers.Serializer):
     def validate(self, data):
-        user = self.context['request'].user
+        user = self.context["request"].user
         if not Task.objects.filter(user=user).exists():
             raise serializers.ValidationError("No tasks found for the user")
         return data
-

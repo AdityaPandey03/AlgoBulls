@@ -6,18 +6,24 @@ from todo.helper import CustomAuthentication
 from django.contrib.auth.hashers import make_password, check_password
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
-from todo.serializers import UserSignupSerializer, UserLoginSerializer, TaskSerializer, TaskTagSerializer, TaskRetrievalSerializer, AllTasksRetrievalSerializer
+from todo.serializers import (
+    UserSignupSerializer,
+    UserLoginSerializer,
+    TaskSerializer,
+    TaskTagSerializer,
+    TaskRetrievalSerializer,
+    AllTasksRetrievalSerializer,
+)
+
 
 class UserViewSet(ViewSet):
-
     def user_signup(self, request):
+        serializer = UserSignupSerializer(data=request.data)
 
-        serializer = UserSignupSerializer(data = request.data)
-        
         if serializer.is_valid():
             user = serializer.create(serializer.validated_data)
             return Response(
-                data = {
+                data={
                     "message": f"{serializer.validated_data.get('username')}, you are on board!",
                     "login_token": user.login_token,
                 },
@@ -26,7 +32,6 @@ class UserViewSet(ViewSet):
         else:
             return Response(serializer.errors, status=403)
 
-       
         # input_username = request.data.get("username")
         # input_password = request.data.get("password")
 
@@ -48,17 +53,17 @@ class UserViewSet(ViewSet):
         # )
 
     def user_login(self, request):
-
-        serializer = UserLoginSerializer(data = request.data)
+        serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid():
-            user = User.objects.filter(username = serializer.validated_data["username"]).get()
+            user = User.objects.filter(
+                username=serializer.validated_data["username"]
+            ).get()
             new_token = str(uuid.uuid4())
             user.login_token = new_token
-            user.save()   
+            user.save()
             return Response(data={"message": "Login successful"}, status=200)
         else:
             return Response(serializer.errors, status=401)
-            
 
         # input_username = request.data.get("username")
         # input_password = request.data.get("password")
@@ -86,13 +91,13 @@ class TaskViewSet(ViewSet):
         if request.user is None:
             return Response(data={"message": "No such user"}, status=401)
 
-        serializer = TaskSerializer(data=request.data, context={'user': request.user})
+        serializer = TaskSerializer(data=request.data, context={"user": request.user})
         if serializer.is_valid():
             task = serializer.save()
-            return Response({"message": "Task created successfully", "task_id": task.id}, status=200)
+            return Response(
+                {"message": "Task created successfully", "task_id": task.id}, status=200
+            )
         return Response(serializer.errors, status=400)
-
-
 
     # def create_task(self, request):
 
@@ -105,60 +110,60 @@ class TaskViewSet(ViewSet):
     #         return Response({"message": "Task created successfully", "task_id": task.id}, status=200)
     #     return Response(serializer.errors, status=400)
 
-    
-    
-        # input_user_id = request.user.id
-        # input_title = request.data.get("title")
-        # input_description = request.data.get("description")
-        # input_due_date = request.data.get("due_date")
-        # input_status = request.data.get("status")
-        # input_tags = request.data.get("tags", [])
+    # input_user_id = request.user.id
+    # input_title = request.data.get("title")
+    # input_description = request.data.get("description")
+    # input_due_date = request.data.get("due_date")
+    # input_status = request.data.get("status")
+    # input_tags = request.data.get("tags", [])
 
-        # valid_status = [choice[0] for choice in Task.STATUS_CHOICES]
+    # valid_status = [choice[0] for choice in Task.STATUS_CHOICES]
 
-        # if input_status is None:
-        #     input_status = "OPEN"
+    # if input_status is None:
+    #     input_status = "OPEN"
 
-        # if input_status not in valid_status:
-        #     return Response(data={"message": "Invalid status"}, status=400)
+    # if input_status not in valid_status:
+    #     return Response(data={"message": "Invalid status"}, status=400)
 
-        # task = Task.objects.create(
-        #     user_id=input_user_id,
-        #     title=input_title,
-        #     description=input_description,
-        #     due_date=input_due_date,
-        #     status=input_status,
-        # )
+    # task = Task.objects.create(
+    #     user_id=input_user_id,
+    #     title=input_title,
+    #     description=input_description,
+    #     due_date=input_due_date,
+    #     status=input_status,
+    # )
 
-        # for tag in input_tags:  # managing the tags, storing them in a separate table
-        #     TaskTag.objects.create(user_id=input_user_id, task_id=task.id, tag=tag)
+    # for tag in input_tags:  # managing the tags, storing them in a separate table
+    #     TaskTag.objects.create(user_id=input_user_id, task_id=task.id, tag=tag)
 
-        # return Response(
-        #     data={"message": "Task created successfully", "task_id": task.id},
-        #     status=200,
-        # )
+    # return Response(
+    #     data={"message": "Task created successfully", "task_id": task.id},
+    #     status=200,
+    # )
 
     def get_task(self, request):
-
         if request.user is None:
-            return Response(data = {"message": "No such user"}, status=401)
-        
+            return Response(data={"message": "No such user"}, status=401)
+
         retrieval_serializer = TaskRetrievalSerializer(data=request.GET)
         if retrieval_serializer.is_valid():
-            input_task_id = retrieval_serializer.validated_data['id']
+            input_task_id = retrieval_serializer.validated_data["id"]
             input_user_id = request.user.id
 
             try:
                 task = Task.objects.get(id=input_task_id, user_id=input_user_id)
             except Task.DoesNotExist:
-                return Response(data={"message": "No such task or not authorized to access"}, status=404)
+                return Response(
+                    data={"message": "No such task or not authorized to access"},
+                    status=404,
+                )
 
-        # Serialize the task for output
+            # Serialize the task for output
             output_serializer = TaskSerializer(task)
             return Response(output_serializer.data, status=200)
         else:
             return Response(retrieval_serializer.errors, status=400)
-    
+
         # input_user_id = request.user.id
         # input_task_id = request.GET.get("id")
 
@@ -190,21 +195,19 @@ class TaskViewSet(ViewSet):
         # )
 
     def get_all_tasks(self, request):
-    # Initialize the serializer with request data and context
+        # Initialize the serializer with request data and context
         if request.user is None:
-            return Response(data = {"message": "No such user"}, status=401)
-        
-        serializer = AllTasksRetrievalSerializer(data=request.data, context={'request': request})
+            return Response(data={"message": "No such user"}, status=401)
+
+        serializer = AllTasksRetrievalSerializer(
+            data=request.data, context={"request": request}
+        )
         if serializer.is_valid():
             tasks = Task.objects.filter(user=request.user)
             task_serializer = TaskSerializer(tasks, many=True)
             return Response(task_serializer.data, status=200)
         else:
             return Response(serializer.errors, status=400)
-
-
-
-    
 
         # input_user_id = request.user.id
 

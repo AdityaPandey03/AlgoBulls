@@ -33,9 +33,7 @@ class Task(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, editable=False)
     timestamp = models.DateTimeField(auto_now_add=True, editable=False)
     title = models.CharField(max_length=MAX_TITLE_LENGTH, blank=False)
-    description = models.CharField(
-        max_length=MAX_DESCRIPTION_LENGTH, blank=False
-    )
+    description = models.CharField(max_length=MAX_DESCRIPTION_LENGTH, blank=False)
     due_date = models.DateField(null=True, blank=True)
     status = models.CharField(
         max_length=MAX_STATUS_LENGTH,
