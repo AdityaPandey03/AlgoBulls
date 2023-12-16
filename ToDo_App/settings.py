@@ -25,7 +25,7 @@ SECRET_KEY = "^)u)2(&3)cenz=ko4lk4e4q!0jnm!v+&c8%ml4_qbu!7i9^zk="
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['.vercel.app', '.now.sh']
+ALLOWED_HOSTS = [".vercel.app", ".now.sh"]
 
 
 # Application definition
@@ -121,6 +121,6 @@ USE_TZ = True
 STATIC_URL = "/static/"
 
 import os
-STATICFILES_DIRS = os.path.join(BASE_DIR, "static"),
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles_build", 'static')
 
+STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles_build", "static")
