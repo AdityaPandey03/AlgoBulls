@@ -3,9 +3,10 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from todo.models import User, Task, TaskTag
 from todo.helper import CustomAuthentication
-from django.contrib.auth.hashers import make_password, check_password
-from rest_framework import serializers
-from rest_framework.exceptions import AuthenticationFailed
+
+# from django.contrib.auth.hashers import make_password, check_password
+# from rest_framework import serializers
+# from rest_framework.exceptions import AuthenticationFailed
 from todo.serializers import (
     UserSignupSerializer,
     UserLoginSerializer,
