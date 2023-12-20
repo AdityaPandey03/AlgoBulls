@@ -3,4 +3,4 @@
 htmlcov
 .ssh
 .ssh.pub
-.env
+env
