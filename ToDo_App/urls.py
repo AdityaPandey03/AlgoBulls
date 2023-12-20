@@ -1,9 +1,10 @@
 from django.contrib import admin
 from django.urls import path
-from todo.views import UserViewSet, TaskViewSet
+from todo.views import UserViewSet, TaskViewSet, home
 
 urlpatterns = [
     # user api's
+    path("", home, name="home"),
     path("admin/", admin.site.urls),
     path("api/signup/", UserViewSet.as_view({"post": "user_signup"})),
     path("api/login/", UserViewSet.as_view({"post": "user_login"})),

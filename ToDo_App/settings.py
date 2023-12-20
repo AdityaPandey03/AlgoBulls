@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
-
+# import dj_database_url
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -25,13 +25,14 @@ SECRET_KEY = "^)u)2(&3)cenz=ko4lk4e4q!0jnm!v+&c8%ml4_qbu!7i9^zk="
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [".vercel.app", ".now.sh", "localhost"]
+ALLOWED_HOSTS = []
 
 
 # Application definition
 
 INSTALLED_APPS = [
     "django.contrib.admin",
+    'rest_framework',
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -68,7 +69,16 @@ TEMPLATES = [
     },
 ]
 
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
 WSGI_APPLICATION = "ToDo_App.wsgi.application"
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ]
+}
+
 
 
 # Database
@@ -80,6 +90,10 @@ DATABASES = {
         "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
     }
 }
+
+# DATABASES["default"] = dj_database_url.parse("postgres://algobulls_render_user:BRdAOftNAd9Gux511yclPTUFgHWpL4mP@dpg-cm1alsun7f5s73e64sk0-a.oregon-postgres.render.com/algobulls_render")
+
+# postgres://algobulls_render_user:BRdAOftNAd9Gux511yclPTUFgHWpL4mP@dpg-cm1alsun7f5s73e64sk0-a.oregon-postgres.render.com/algobulls_render
 
 
 # Password validation

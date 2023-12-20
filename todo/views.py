@@ -1,9 +1,14 @@
 import uuid
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
+from django.http import HttpResponse
 from todo.models import User, Task, TaskTag
 from todo.helper import CustomAuthentication
 from django.contrib.auth.hashers import make_password, check_password
+
+
+def home(request):
+    return HttpResponse("Welcome to the ToDo App!")
 
 
 class UserViewSet(ViewSet):
