@@ -1,4 +1,6 @@
 *.pyc
 .coverage
 htmlcov
-env
+.ssh
+.ssh.pub
+.env
