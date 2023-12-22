@@ -1,6 +1,8 @@
 # **AlgoBulls Assignment**
 
+#### **Model Schema Diagram**
 
+![1703286240188](image/README/1703286240188.png)
 
 Root Folder -> AlgoBulls
 
